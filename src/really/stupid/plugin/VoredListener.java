@@ -41,7 +41,7 @@ public class VoredListener implements Listener {
             int count = voreCount.get(killer);
 
             String killerName = killer.getName();
-            event.setDeathMessage(playerName + " got vored by " + killerName + ". (" + count + ")");
+            event.setDeathMessage(playerName + " got vored by " + killerName);
 
             switch (count) {
                 case 3:
