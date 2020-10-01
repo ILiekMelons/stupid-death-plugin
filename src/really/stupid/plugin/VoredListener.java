@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -19,10 +20,13 @@ public class VoredListener implements Listener {
 
     private final Logger logger;
     private final boolean Friendly;
+    private final boolean joinLeaveMessage;
 
-    public VoredListener(Logger logger, boolean Friendly) {
+    public VoredListener(Logger logger, boolean Friendly, boolean joinLeaveMessage) {
         this.logger = logger;
         this.Friendly = Friendly;
+        this.joinLeaveMessage = joinLeaveMessage;
+        logger.info("Family friendly mode is set to " + Friendly);
     }
 
     @EventHandler
@@ -30,16 +34,14 @@ public class VoredListener implements Listener {
         logger.info(event.getEntity().getDisplayName()+ " just died lol");
 
         Player entity = event.getEntity();
-        Player victim = (Player) event;
         Player killer = entity.getKiller();
-        String playerName = event.getEntity().getName();
+        String playerName = entity.getName();
         EntityDamageEvent damageEvent = entity.getLastDamageCause();
         DamageCause reason = damageEvent.getCause();
 
-
-
         if (killer != null) {
             voreCount.putIfAbsent(killer, 0);
+            voreCount.putIfAbsent(entity, 0);
             voreCount.merge(killer, 1, Integer::sum);
             int count = voreCount.get(killer);
 
@@ -77,17 +79,28 @@ public class VoredListener implements Listener {
 
             }
 
-            if (voreCount.get(event) > 3) {
-                victim.sendMessage(ChatColor.RED + "We all make mistakes.");
+            if (voreCount.get(entity) > 3) {
+                entity.sendMessage(ChatColor.RED + "We all make mistakes.");
+                voreCount.put(entity, 0);
             }
-            voreCount.put(victim, 0);
         } else if(reason == DamageCause.FALL || reason == DamageCause.SUICIDE) {
-            event.setDeathMessage(ChatColor.RED + playerName + " didn't want to live anymore.");
+            event.setDeathMessage(ChatColor.RED + playerName + (this.Friendly ? " didn't want to live." : " committed suicide."));
         }
     }
 
     @EventHandler
     public void onPlayerLeaveEvent(PlayerQuitEvent event) {
         voreCount.put(event.getPlayer(), 0);
+        if(this.joinLeaveMessage) {
+            event.setQuitMessage(ChatColor.YELLOW + event.getPlayer().getDisplayName() + " no longer exists.");
+        }
+    }
+
+    @EventHandler
+    public void onPlayerJoinEvent(PlayerJoinEvent event) {
+        voreCount.put(event.getPlayer(), 0);
+        if(this.joinLeaveMessage) {
+            event.setJoinMessage(ChatColor.YELLOW + event.getPlayer().getDisplayName() + " exists.");
+        }
     }
 }

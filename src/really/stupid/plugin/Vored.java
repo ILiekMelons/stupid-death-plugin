@@ -7,16 +7,19 @@ import java.util.logging.Logger;
 
 public class Vored extends JavaPlugin {
     Logger logger = getLogger();
-    FileConfiguration config = this.getConfig();
 
     @Override
     public void onEnable() {
         logger.info("Hello world!");
 
-        config.addDefault("familyFriendlyMode", true);
-        boolean friendly = config.getBoolean("familyFriendlyMode");
+        this.saveDefaultConfig();
+        FileConfiguration config = this.getConfig();
+        config.addDefault("family-friendly", false);
+        config.addDefault("join-leave", false);
+        boolean friendly = config.getBoolean("family-friendly");
+        boolean leave = config.getBoolean("join-leave");
 
-        getServer().getPluginManager().registerEvents(new VoredListener(logger, friendly), this);
+        getServer().getPluginManager().registerEvents(new VoredListener(logger, friendly, leave), this);
     }
 
     @Override
