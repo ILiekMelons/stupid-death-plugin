@@ -12,6 +12,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -25,7 +26,7 @@ public class VoredListener implements Listener {
         this.logger = logger;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onPlayerDeathEvent(PlayerDeathEvent event) {
         Player entity = event.getEntity();
         Player victim = (Player) event;
@@ -35,7 +36,6 @@ public class VoredListener implements Listener {
         DamageCause reason = damageEvent.getCause();
 
         if (killer != null) {
-            logger.info("vored");
             voreCount.putIfAbsent(killer, 0);
             voreCount.merge(killer, 1, Integer::sum);
             int count = voreCount.get(killer);
@@ -66,15 +66,16 @@ public class VoredListener implements Listener {
                     Bukkit.broadcastMessage(ChatColor.DARK_RED + killerName + " is truly insane.");
                     killer.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 240, 1));
                     killer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 240, 2));
-                    killer.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 2550000, 8));
+                    killer.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 2550, 8));
                     killer.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 2400, 4));
                     killer.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 2400, 1));
                     killer.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 120, 1));
                     killer.playSound(killer.getLocation(), Sound.ENTITY_ENDERMAN_STARE, 1, 1);
+
             }
 
             if (voreCount.get(event) > 3) {
-                victim.sendMessage(ChatColor.RED + "We all make mistakes sometimes.");
+                victim.sendMessage(ChatColor.RED + "We all make mistakes.");
             }
             voreCount.put(victim, 0);
         } else if(reason == DamageCause.FALL || reason == DamageCause.SUICIDE) {
