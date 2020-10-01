@@ -1,10 +1,8 @@
 package really.stupid.plugin;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -12,7 +10,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -20,14 +17,19 @@ import java.util.logging.Logger;
 public class VoredListener implements Listener {
     HashMap<Player, Integer> voreCount = new HashMap<>();
 
-    private final Logger logger;
 
-    public VoredListener(Logger logger) {
+    private final Logger logger;
+    private final boolean Friendly;
+
+    public VoredListener(Logger logger, boolean Friendly) {
         this.logger = logger;
+        this.Friendly = Friendly;
     }
 
     @EventHandler
     public void onPlayerDeathEvent(PlayerDeathEvent event) {
+        logger.info(event.getEntity().getDisplayName()+ " just died lol");
+
         Player entity = event.getEntity();
         Player victim = (Player) event;
         Player killer = entity.getKiller();
@@ -35,13 +37,15 @@ public class VoredListener implements Listener {
         EntityDamageEvent damageEvent = entity.getLastDamageCause();
         DamageCause reason = damageEvent.getCause();
 
+
+
         if (killer != null) {
             voreCount.putIfAbsent(killer, 0);
             voreCount.merge(killer, 1, Integer::sum);
             int count = voreCount.get(killer);
 
             String killerName = killer.getName();
-            event.setDeathMessage(playerName + " got vored by " + killerName);
+            event.setDeathMessage(playerName + " got " + (this.Friendly ? "killed" : "vored") + " by " + killerName);
 
             switch (count) {
                 case 3:

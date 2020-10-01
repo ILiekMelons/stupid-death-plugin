@@ -1,4 +1,8 @@
 name: vored
-main: really.stupid.plugin.Vored
-version: 1
+author: spiderthotep#1323
 description: i'm sorry graevik
+website: https://github.com/ILiekMelons/stupid-death-plugin/
+main: really.stupid.plugin.Vored
+version: 1.0.0
+api-version: 1.16
+load: POSTWORLD
